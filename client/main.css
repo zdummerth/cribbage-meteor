@@ -193,3 +193,7 @@ header {
 
   font-weight: bold;
 }
+
+.create-game-btn {
+  color: orange;
+}

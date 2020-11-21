@@ -1,5 +1,5 @@
 {
-  "name": "todos-react",
+  "name": "cribbage",
   "private": true,
   "scripts": {
     "start": "meteor run",

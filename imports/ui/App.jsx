@@ -1,52 +1,39 @@
 import { Meteor } from 'meteor/meteor';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
-import { TasksCollection } from '/imports/db/TasksCollection';
-import { Task } from './Task';
-import { TaskForm } from './TaskForm';
+import { GamesCollection } from '/imports/db/GamesCollection';
+import { Game } from './Game';
 import { LoginForm } from './LoginForm';
+import { CreateGameBtn } from './CreateGameBtn';
+
 
 const toggleChecked = ({ _id, isChecked }) =>
-  Meteor.call('tasks.setIsChecked', _id, !isChecked);
+  Meteor.call('games.setIsChecked', _id, !isChecked);
 
-const deleteTask = ({ _id }) => Meteor.call('tasks.remove', _id);
+const deleteGame = ({ _id }) => Meteor.call('games.remove', _id);
 
 export const App = () => {
   const user = useTracker(() => Meteor.user());
 
-  const [hideCompleted, setHideCompleted] = useState(false);
-
-  const hideCompletedFilter = { isChecked: { $ne: true } };
-
-  const userFilter = user ? { userId: user._id } : {};
-
-  const pendingOnlyFilter = { ...hideCompletedFilter, ...userFilter };
-
-  const { tasks, pendingTasksCount, isLoading } = useTracker(() => {
-    const noDataAvailable = { tasks: [], pendingTasksCount: 0 };
+  const { games, isLoading } = useTracker(() => {
+    const noDataAvailable = { games: [] };
     if (!Meteor.user()) {
       return noDataAvailable;
     }
-    const handler = Meteor.subscribe('tasks');
+    const handler = Meteor.subscribe('games');
 
     if (!handler.ready()) {
       return { ...noDataAvailable, isLoading: true };
     }
 
-    const tasks = TasksCollection.find(
-      hideCompleted ? pendingOnlyFilter : userFilter,
-      {
-        sort: { createdAt: -1 },
-      }
-    ).fetch();
-    const pendingTasksCount = TasksCollection.find(pendingOnlyFilter).count();
+    const games = GamesCollection.find({}).fetch();
 
-    return { tasks, pendingTasksCount };
+    return { games };
   });
 
-  const pendingTasksTitle = `${
-    pendingTasksCount ? ` (${pendingTasksCount})` : ''
-  }`;
+
+
+  const [ inWaitingRoom, setInWaitingRoom ] = useState(false);
 
   const logout = () => Meteor.logout();
 
@@ -56,8 +43,7 @@ export const App = () => {
         <div className="app-bar">
           <div className="app-header">
             <h1>
-              📝️ To Do List
-              {pendingTasksTitle}
+              Mother Fucking Cribbage
             </h1>
           </div>
         </div>
@@ -70,23 +56,20 @@ export const App = () => {
               {user.username} 🚪
             </div>
 
-            <TaskForm />
+            <CreateGameBtn />
 
-            <div className="filter">
-              <button onClick={() => setHideCompleted(!hideCompleted)}>
-                {hideCompleted ? 'Show All' : 'Hide Completed'}
-              </button>
-            </div>
 
             {isLoading && <div className="loading">loading...</div>}
 
+
+
             <ul className="tasks">
-              {tasks.map(task => (
-                <Task
-                  key={task._id}
-                  task={task}
+              {games.map(game => (
+                <Game
+                  key={game._id}
+                  game={game}
                   onCheckboxClick={toggleChecked}
-                  onDeleteClick={deleteTask}
+                  onDeleteClick={deleteGame}
                 />
               ))}
             </ul>

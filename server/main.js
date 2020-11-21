@@ -1,39 +1,41 @@
 
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
-import { TasksCollection } from '/imports/db/TasksCollection';
-import '/imports/api/tasksMethods';
-import '/imports/api/tasksPublications';
+import { GamesCollection } from '/imports/db/GamesCollection';
+import '/imports/api/gamesMethods';
+import '/imports/api/gamesPublications';
 
-const insertTask = (taskText, user) =>
-  TasksCollection.insert({
-    text: taskText,
-    userId: user._id,
-    createdAt: new Date(),
-  });
 
-const SEED_USERNAME = 'meteorite';
-const SEED_PASSWORD = 'password';
 
+const players = [
+  {
+    name: 'p1',
+    pass: 'p1'
+  },
+  {
+    name: 'p2',
+    pass: 'p2'
+  }
+]
 Meteor.startup(() => {
-  if (!Accounts.findUserByUsername(SEED_USERNAME)) {
-    Accounts.createUser({
-      username: SEED_USERNAME,
-      password: SEED_PASSWORD,
+  players.forEach(p => {
+    if (!Accounts.findUserByUsername(p.name)) {
+      Accounts.createUser({
+        username: p.name,
+        password: p.pass,
+      });
+    }
+  })
+
+
+  const user = Accounts.findUserByUsername(players[0].name);
+
+  if (GamesCollection.find().count() === 0) {
+    GamesCollection.insert({
+      playerOneId: user._id,
+      createdAt: new Date(),
     });
   }
 
-  const user = Accounts.findUserByUsername(SEED_USERNAME);
 
-  if (TasksCollection.find().count() === 0) {
-    [
-      'First Task',
-      'Second Task',
-      'Third Task',
-      'Fourth Task',
-      'Fifth Task',
-      'Sixth Task',
-      'Seventh Task',
-    ].forEach(taskText => insertTask(taskText, user));
-  }
 });
