@@ -2,8 +2,13 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { GamesCollection } from '/imports/db/GamesCollection';
-import '/imports/api/gamesMethods';
-import '/imports/api/gamesPublications';
+
+import '/imports/api/games/Methods';
+import '/imports/api/games/Publications';
+import '/imports/api/users/Methods';
+import '/imports/api/users/Publications';
+import '/imports/api/invites/Methods';
+import '/imports/api/invites/Publications';
 
 
 
@@ -28,12 +33,12 @@ Meteor.startup(() => {
   })
 
 
-  const user = Accounts.findUserByUsername(players[0].name);
+  // const user = Accounts.findUserByUsername(players[0].name);
 
   if (GamesCollection.find().count() === 0) {
     GamesCollection.insert({
-      playerOneId: user._id,
       createdAt: new Date(),
+      players: [],
     });
   }
 

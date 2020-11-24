@@ -2,20 +2,71 @@ import { Meteor } from 'meteor/meteor';
 import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { GamesCollection } from '/imports/db/GamesCollection';
-import { Game } from './Game';
+import { InvitesCollection } from '/imports/db/InvitesCollection';
+
 import { LoginForm } from './LoginForm';
-import { CreateGameBtn } from './CreateGameBtn';
+import { WaitingRoom } from './WaitingRoom';
+import { Invites } from './Invites';
+import { Games } from './Games';
+
+import { removeGame } from '../api/games/Methods'
+import { createInvite } from '../api/invites/Methods'
 
 
-const toggleChecked = ({ _id, isChecked }) =>
-  Meteor.call('games.setIsChecked', _id, !isChecked);
 
-const deleteGame = ({ _id }) => Meteor.call('games.remove', _id);
+
+
+
+
+
+const sendInvite = ({ _id, username }) => createInvite.call({ _id, username });
+const deleteGame = ({ _id }) => removeGame.call(_id);
+
+
 
 export const App = () => {
-  const user = useTracker(() => Meteor.user());
+  const { username, _id, inWaitingRoom } = useTracker(() => {
+    if (!Meteor.user()) {
+      return {};
+    }
+    const handler = Meteor.subscribe('Meteor.users.inWaitingRoom');
 
-  const { games, isLoading } = useTracker(() => {
+    if (!handler.ready()) {
+      return {};
+    }
+    return Meteor.user()
+  })
+
+
+  const setInWaitingRoom = () => {
+    console.log({ username, _id, inWaitingRoom });
+    return Meteor.call('users.setInWaitingRoom')
+  };
+
+  
+
+
+
+
+  const { invites, isLoading } = useTracker(() => {
+    const noDataAvailable = { invites: [] };
+    if (!Meteor.user()) {
+      return noDataAvailable;
+    }
+    const handler = Meteor.subscribe('invites');
+
+    if (!handler.ready()) {
+      return { ...noDataAvailable, isLoading: true };
+    }
+
+
+    const invites = InvitesCollection.find({}).fetch();
+
+
+    return { invites };
+  });
+
+  const { games } = useTracker(() => {
     const noDataAvailable = { games: [] };
     if (!Meteor.user()) {
       return noDataAvailable;
@@ -26,14 +77,23 @@ export const App = () => {
       return { ...noDataAvailable, isLoading: true };
     }
 
+
     const games = GamesCollection.find({}).fetch();
+
 
     return { games };
   });
 
 
 
-  const [ inWaitingRoom, setInWaitingRoom ] = useState(false);
+
+
+
+
+  const [ waitingRoomOpen, setwaitingRoomOpen ] = useState(false);
+  const toggleWaitingRoom = () => setwaitingRoomOpen(!waitingRoomOpen);
+  const waitingRoomBtnText = waitingRoomOpen ? 'Close Waiting Room' : 'View Waiting Room';
+
 
   const logout = () => Meteor.logout();
 
@@ -50,29 +110,37 @@ export const App = () => {
       </header>
 
       <div className="main">
-        {user ? (
+        {Meteor.user() ? (
           <>
             <div className="user" onClick={logout}>
-              {user.username} 🚪
+              {Meteor.user().username} 🚪
             </div>
 
-            <CreateGameBtn />
+
+            <Games
+              games={games}
+              onDeleteClick={deleteGame}
+            />
+
+            <Invites
+              invites={invites}
+              userId={_id}
+            />
 
 
-            {isLoading && <div className="loading">loading...</div>}
+            <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button>
+
+            {waitingRoomOpen && 
+              <WaitingRoom
+                setInWaitingRoom={setInWaitingRoom}
+                inWaitingRoom={inWaitingRoom}
+                sendInvite={sendInvite}
+             /> 
+            }
+
+            {isLoading && <div className="loading">loading waiting room...</div>}
 
 
-
-            <ul className="tasks">
-              {games.map(game => (
-                <Game
-                  key={game._id}
-                  game={game}
-                  onCheckboxClick={toggleChecked}
-                  onDeleteClick={deleteGame}
-                />
-              ))}
-            </ul>
           </>
         ) : (
           <LoginForm />
