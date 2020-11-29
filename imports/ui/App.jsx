@@ -7,10 +7,17 @@ import { InvitesCollection } from '/imports/db/InvitesCollection';
 import { LoginForm } from './LoginForm';
 import { WaitingRoom } from './WaitingRoom';
 import { Invites } from './Invites';
-import { Games } from './Games';
+import { GamesListing } from './GamesListing';
+import { CurrentGame } from './CurrentGame';
+
 
 import { removeGame } from '../api/games/Methods'
 import { createInvite } from '../api/invites/Methods'
+// import { createHand } from '../api/invites/Methods'
+
+
+
+import Card from '/imports/ui/Card';
 
 
 
@@ -19,23 +26,31 @@ import { createInvite } from '../api/invites/Methods'
 
 
 
-const sendInvite = ({ _id, username }) => createInvite.call({ _id, username });
+
+const sendInvite = receiverId => createInvite.call(receiverId);
 const deleteGame = ({ _id }) => removeGame.call(_id);
 
 
 
 export const App = () => {
-  const { username, _id, inWaitingRoom } = useTracker(() => {
-    if (!Meteor.user()) {
-      return {};
-    }
-    const handler = Meteor.subscribe('Meteor.users.inWaitingRoom');
 
-    if (!handler.ready()) {
-      return {};
+
+  const user = useTracker(() => {
+    const noDataAvailable = { username: '', _id: '', inWaitingRoom: false };
+    if (!Meteor.user()) {
+      return noDataAvailable;
+    }
+    const handler = Meteor.subscribe('user');
+    const usersHandler = Meteor.subscribe('users');
+    
+
+    if (!(handler.ready() && usersHandler.ready())) {
+      return noDataAvailable;
     }
     return Meteor.user()
-  })
+  });
+
+  const { username, _id, inWaitingRoom } = user
 
 
   const setInWaitingRoom = () => {
@@ -67,14 +82,18 @@ export const App = () => {
   });
 
   const { games } = useTracker(() => {
-    const noDataAvailable = { games: [] };
+    const noDataAvailable = {
+      games: [
+        { _id: '', players: ['', ''], completed: false}
+      ]
+    }
     if (!Meteor.user()) {
       return noDataAvailable;
     }
     const handler = Meteor.subscribe('games');
 
     if (!handler.ready()) {
-      return { ...noDataAvailable, isLoading: true };
+      return noDataAvailable;
     }
 
 
@@ -86,16 +105,23 @@ export const App = () => {
 
 
 
-
-
-
-
   const [ waitingRoomOpen, setwaitingRoomOpen ] = useState(false);
   const toggleWaitingRoom = () => setwaitingRoomOpen(!waitingRoomOpen);
   const waitingRoomBtnText = waitingRoomOpen ? 'Close Waiting Room' : 'View Waiting Room';
 
 
   const logout = () => Meteor.logout();
+
+  const [ currentGame, setCurrentGame ] = useState(null);
+
+  const playGame = ({ game } ) => {
+    // console.log({game})
+    setCurrentGame(game)
+  }
+  const closeGame = () => setCurrentGame(null)
+
+
+
 
   return (
     <div className="app">
@@ -117,30 +143,36 @@ export const App = () => {
             </div>
 
 
-            <Games
-              games={games}
-              onDeleteClick={deleteGame}
-            />
+            <button onClick={() => console.log(user)}>user</button>
+            { currentGame ? (
+              <CurrentGame 
+                game={currentGame}
+                closeGame={closeGame}
+               />
+            ) : (
+              <>
+                <GamesListing
+                  games={games}
+                  onDeleteClick={deleteGame}
+                  playGame={playGame}
+                />
 
-            <Invites
-              invites={invites}
-              userId={_id}
-            />
+                <Invites
+                  invites={invites}
+                  userId={_id}
+                />
 
+                <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button>
 
-            <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button>
-
-            {waitingRoomOpen && 
-              <WaitingRoom
-                setInWaitingRoom={setInWaitingRoom}
-                inWaitingRoom={inWaitingRoom}
-                sendInvite={sendInvite}
-             /> 
-            }
-
-            {isLoading && <div className="loading">loading waiting room...</div>}
-
-
+                {waitingRoomOpen && 
+                  <WaitingRoom
+                    setInWaitingRoom={setInWaitingRoom}
+                    inWaitingRoom={inWaitingRoom}
+                    sendInvite={sendInvite}
+                  /> 
+                }
+              </>
+            )}
           </>
         ) : (
           <LoginForm />

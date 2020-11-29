@@ -6,7 +6,7 @@ import { Invite } from './Invite';
 
 export const Invites = ({ invites, userId }) => {
     const sent = invites
-                    .filter(invite => invite.sender._id === userId)
+                    .filter(invite => invite.senderId === userId)
                     .map(invite => (
                         <Invite
                             key={invite._id}
@@ -15,7 +15,7 @@ export const Invites = ({ invites, userId }) => {
                         />
                     ))
     const received = invites
-                        .filter(invite => invite.receiver._id === userId)
+                        .filter(invite => invite.receiverId === userId)
                         .map(invite => (
                             <Invite
                                 key={invite._id}

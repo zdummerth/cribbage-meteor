@@ -3,8 +3,8 @@ import { InvitesCollection } from '/imports/db/InvitesCollection';
 
 
 const publicFields = {
-    receiver: { _id: 1, username: 1},
-    sender: { _id: 1, username: 1},
+    receiverId: 1,
+    senderId: 1,
 }
 
 Meteor.publish('invites', function publishInvites() {
@@ -15,7 +15,7 @@ Meteor.publish('invites', function publishInvites() {
     }
 
     const selector = {
-        $or: [{ "sender._id": this.userId }, { "receiver._id": this.userId }]
+        $or: [{ senderId: this.userId }, { receiverId: this.userId }]
       };
     
       const options = {

@@ -2,59 +2,62 @@ import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
 import { GamesCollection } from '/imports/db/GamesCollection';
+import { HandsCollection } from '/imports/db/HandsCollection';
+import { InvitesCollection } from '/imports/db/InvitesCollection';
+
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
+import { createHand } from '../hands/Methods'
+
+
 
 export const createGame = new ValidatedMethod({
   name: 'games.create',
-  validate(players) {
-    check(players, [{
-      _id: String,
-      username: String
-    }])
+  validate({otherId, inviteId}) {
+    check({otherId, inviteId}, {
+      otherId: String,
+      inviteId: String
+    })
   },
 
-  run(players) {
+  run({otherId, inviteId}) {
+
+    console.log({inviteId, otherId})
 
     if (!this.userId) {
       throw new Meteor.Error('Not authorized.');
     }
 
-    if(players.every(player => player._id === this.userId)) {
+
+    if(otherId === this.userId) {
       throw new Meteor.Error('You cannot create a game with yourself');
     }
 
-    const playerIndex = players.findIndex(player => player._id === this.userId);
-
-    if (playerIndex < 0) {
-      throw new Meteor.Error('You cannot create a game for another player');
-    }
-
-    const opponentData = players.find(player => player._id !== this.userId);
-
-    const opponent = Meteor.users.find({ username: opponentData.username, _id: opponentData._id});
+    const opponent = Meteor.users.findOne(otherId);
 
     if (!opponent) {
       throw new Meteor.Error('opponent does not exist');
     }
 
+    const invite = InvitesCollection.findOne({ _id: inviteId, $or: [{ senderId: this.userId }, { receiverId: this.userId }] });
 
-
-
-    const username = Meteor.user({fields: {"username": 1}}).username;
-    const userData = {
-      _id: this.userId,
-      username: username
+    if (!invite) {
+      throw new Meteor.Error('There must be an invite to create a game');
     }
 
 
 
     const gameId = GamesCollection.insert({
       createdAt: new Date(),
-      players: [ userData, opponentData ],
-      completed: false
+      players: [ this.userId, otherId ],
+      completed: false,
+      run: [],
+      crib: []
     });
 
+    InvitesCollection.remove(inviteId);
+
+    createHand.call(gameId)
 
   }
 });
@@ -67,7 +70,8 @@ export const removeGame = new ValidatedMethod({
 
   run(gameId) {
 
-    const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { _id: this.userId } } });
+    const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
+
 
 
     if (!game) {

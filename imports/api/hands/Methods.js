@@ -1,47 +1,73 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
-import { InvitesCollection } from '/imports/db/InvitesCollection';
+import { HandsCollection } from '/imports/db/HandsCollection';
+import { GamesCollection } from '/imports/db/GamesCollection';
+
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import { createGame } from '../games/Methods'
+
+import { deal } from '../cardFunctions.js'
+
 
 
 
 export const createHand = new ValidatedMethod({
   name: 'hands.create',
-  validate(receiver) {
-    check(receiver, {
-      _id: String,
-      username: String
-    })
+  validate(gameId) {
+    check(gameId, String)
   },
 
-  run(receiver) {
+  run(gameId) {
 
     if (!this.userId) {
       throw new Meteor.Error('Not authorized.');
     }
 
-    const receiverExists = Meteor.users.findOne({ _id: receiver._id, username: receiver.username});
+    const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
 
-    if (!receiverExists) {
-      throw new Meteor.Error('Invite recipient does not exist');
+
+    // console.log({game})
+
+    if (!game) {
+      throw new Meteor.Error('Could Not find Game');
     }
 
-    const senderName = Meteor.user({fields: {"username": 1}}).username;
+    const opponentId = game.players.find(playerId => playerId !== this.userId);
 
-    const senderData = {
-      _id: this.userId,
-      username: senderName
-    }
+    const deck = deal(2, 6);
 
-    const newInvite = {
-      createdAt: new Date(),
-      sender: senderData,
-      receiver
-    }
+    const userHand = deck.players[0].hand;
+    const oppHand = deck.players[1].hand;
 
-    InvitesCollection.insert(newInvite);
+
+    // console.log({userHand, oppHand})
+
+    const timestamp = new Date();
+
+    const handOneId = HandsCollection.insert({
+      createdAt: timestamp,
+      dealt: userHand,
+      discarded: [],
+      completed: false,
+      userId: this.userId,
+      gameId,
+      handLength: 6
+    });
+
+    const handTwoId = HandsCollection.insert({
+      createdAt: timestamp,
+      dealt: oppHand,
+      discarded: [],
+      completed: false,
+      userId: opponentId,
+      gameId,
+      handLength: 6
+    });
+
+    // console.log({handOneId, handTwoId})
+
+
   }
 });
 
@@ -57,13 +83,13 @@ export const removeHand = new ValidatedMethod({
       throw new Meteor.Error('Not authorized.');
     }
 
-    const invite = InvitesCollection.findOne({ _id: inviteId, $or: [{'sender._id': this.userId}, {'receiver._id': this.userId}] });
+    const invite = HandsCollection.findOne({ _id: inviteId, $or: [{'sender._id': this.userId}, {'receiver._id': this.userId}] });
 
     if (!invite) {
       throw new Meteor.Error('Access denied.');
     }
 
-    InvitesCollection.remove(inviteId);
+    HandsCollection.remove(inviteId);
   }
 });
 
@@ -83,7 +109,7 @@ export const acceptInvite = new ValidatedMethod({
       throw new Meteor.Error('Not authorized.');
     }
 
-    const invite = InvitesCollection.findOne({ _id: inviteId, 'receiver._id': this.userId, 'sender._id': oppId, 'sender.username': oppUsername });
+    const invite = HandsCollection.findOne({ _id: inviteId, 'receiver._id': this.userId, 'sender._id': oppId, 'sender.username': oppUsername });
 
     if (!invite) {
       throw new Meteor.Error('Access denied.');
@@ -101,6 +127,6 @@ export const acceptInvite = new ValidatedMethod({
 
     createGame.call([ userData, oppData ])
 
-    InvitesCollection.remove(inviteId);
+    HandsCollection.remove(inviteId);
   }
 });

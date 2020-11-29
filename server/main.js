@@ -6,9 +6,11 @@ import { GamesCollection } from '/imports/db/GamesCollection';
 import '/imports/api/games/Methods';
 import '/imports/api/games/Publications';
 import '/imports/api/users/Methods';
-import '/imports/api/users/Publications';
+import '/imports/api/users/server/Publications';
 import '/imports/api/invites/Methods';
 import '/imports/api/invites/Publications';
+import '/imports/api/hands/Methods';
+import '/imports/api/hands/Publications';
 
 
 

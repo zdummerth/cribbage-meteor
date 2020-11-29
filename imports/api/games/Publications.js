@@ -11,10 +11,6 @@ Meteor.publish('games', function publishGames() {
     }
 
 
-    return GamesCollection.find({ players: { $elemMatch: { _id: this.userId } } });
-
-
-    // return all games for testing
-    // return GamesCollection.find({});
+    return GamesCollection.find({});
 
 });
