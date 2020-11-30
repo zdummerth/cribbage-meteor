@@ -93,40 +93,25 @@ export const removeHand = new ValidatedMethod({
   }
 });
 
-export const acceptInvite = new ValidatedMethod({
-  name: 'invites.accept',
-  validate(inviteData) {
-    check(inviteData, {
-      inviteId: String,
-      oppId: String,
-      oppUsername: String
-    })
+export const discardToCrib = new ValidatedMethod({
+  name: 'hand.discardToCrib',
+  validate({ cards, handId }) {
+    check(cards, [ String ])
   },
 
-  run({ inviteId, oppId, oppUsername }) {
+  run(cards) {
 
     if (!this.userId) {
       throw new Meteor.Error('Not authorized.');
     }
 
-    const invite = HandsCollection.findOne({ _id: inviteId, 'receiver._id': this.userId, 'sender._id': oppId, 'sender.username': oppUsername });
+    const hand = HandsCollection.findOne({ _id: handId, userId: this.userId });
 
-    if (!invite) {
+    if (!hand) {
       throw new Meteor.Error('Access denied.');
     }
 
-    const username = Meteor.user({fields: {"username": 1}}).username;
-    const userData = {
-      _id: this.userId,
-      username: username
-    }
-    const oppData = {
-      _id: oppId,
-      username: oppUsername
-    }
-
-    createGame.call([ userData, oppData ])
-
-    HandsCollection.remove(inviteId);
+    HandsCollection.updata(handId, { $set: { discarded: cards } } );
+    
   }
 });

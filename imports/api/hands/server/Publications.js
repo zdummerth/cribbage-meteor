@@ -5,15 +5,6 @@ import { HandsCollection } from '/imports/db/HandsCollection';
 import { GamesCollection } from '/imports/db/GamesCollection';
 
 
-
-const publicFields = {
-  dealt: 1,
-  discarded: 1,
-  completed: 1,
-  userId: 1,
-  gameId: 1
-}
-
 Meteor.publish('hand.forGame', function publishGames(gameId) {
   check(gameId, String)
 
@@ -28,13 +19,20 @@ Meteor.publish('hand.forGame', function publishGames(gameId) {
     throw new Meteor.Error('Access denied.');
   }
 
-  const Selector = {
+  const selector = {
     gameId,
     userId: this.userId
   }
 
+  const publicFields = {
+    dealt: 1,
+    discarded: 1,
+    completed: 1,
+    userId: 1,
+    gameId: 1
+  }
 
-  return HandsCollection.find(Selector);
+  return HandsCollection.find(selector, { fields: publicFields });
 
 });
 
@@ -57,17 +55,16 @@ Meteor.publish('opponent.handLength', function publishGames(gameId) {
 
   const opponentId = game.players.find(playerId => playerId !== this.userId);
 
-
   const Selector = {
     gameId,
     userId: opponentId
   }
 
   const publicFields = {
-    fields: { handLength: 1 }
+    handLength: 1,
+    userId : 1
   }
 
-
-  return HandsCollection.find(Selector, publicFields);
+  return HandsCollection.find(Selector, { fields: publicFields } );
 
 });

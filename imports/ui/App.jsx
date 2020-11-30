@@ -13,23 +13,10 @@ import { CurrentGame } from './CurrentGame';
 
 import { removeGame } from '../api/games/Methods'
 import { createInvite } from '../api/invites/Methods'
-// import { createHand } from '../api/invites/Methods'
-
-
-
-import Card from '/imports/ui/Card';
-
-
-
-
-
-
-
 
 
 const sendInvite = receiverId => createInvite.call(receiverId);
 const deleteGame = ({ _id }) => removeGame.call(_id);
-
 
 
 export const App = () => {
@@ -47,16 +34,12 @@ export const App = () => {
     if (!(handler.ready() && usersHandler.ready())) {
       return noDataAvailable;
     }
+    
     return Meteor.user()
   });
 
-  const { username, _id, inWaitingRoom } = user
 
-
-  const setInWaitingRoom = () => {
-    console.log({ username, _id, inWaitingRoom });
-    return Meteor.call('users.setInWaitingRoom')
-  };
+  const setInWaitingRoom = () => Meteor.call('users.setInWaitingRoom');
 
   
 
@@ -136,10 +119,10 @@ export const App = () => {
       </header>
 
       <div className="main">
-        {Meteor.user() ? (
+        {user ? (
           <>
             <div className="user" onClick={logout}>
-              {Meteor.user().username} 🚪
+              {user.username} 🚪
             </div>
 
 
@@ -148,6 +131,7 @@ export const App = () => {
               <CurrentGame 
                 game={currentGame}
                 closeGame={closeGame}
+                user={user}
                />
             ) : (
               <>
@@ -159,7 +143,7 @@ export const App = () => {
 
                 <Invites
                   invites={invites}
-                  userId={_id}
+                  userId={user._id}
                 />
 
                 <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button>
@@ -167,7 +151,7 @@ export const App = () => {
                 {waitingRoomOpen && 
                   <WaitingRoom
                     setInWaitingRoom={setInWaitingRoom}
-                    inWaitingRoom={inWaitingRoom}
+                    inWaitingRoom={user.inWaitingRoom}
                     sendInvite={sendInvite}
                   /> 
                 }

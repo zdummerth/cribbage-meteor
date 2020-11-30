@@ -4,13 +4,15 @@ import { Accounts } from 'meteor/accounts-base';
 import { GamesCollection } from '/imports/db/GamesCollection';
 
 import '/imports/api/games/Methods';
-import '/imports/api/games/Publications';
+import '/imports/api/games/server/Publications';
 import '/imports/api/users/Methods';
 import '/imports/api/users/server/Publications';
 import '/imports/api/invites/Methods';
-import '/imports/api/invites/Publications';
+import '/imports/api/invites/server/Publications';
 import '/imports/api/hands/Methods';
-import '/imports/api/hands/Publications';
+import '/imports/api/hands/server/Publications';
+import '/imports/api/scores/Methods';
+import '/imports/api/scores/server/Publications';
 
 
 

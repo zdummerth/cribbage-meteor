@@ -8,6 +8,8 @@ import { InvitesCollection } from '/imports/db/InvitesCollection';
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import { createHand } from '../hands/Methods'
+import { createScores } from '../scores/Methods'
+
 
 
 
@@ -57,7 +59,8 @@ export const createGame = new ValidatedMethod({
 
     InvitesCollection.remove(inviteId);
 
-    createHand.call(gameId)
+    createHand.call(gameId);
+    createScores.call(gameId);
 
   }
 });

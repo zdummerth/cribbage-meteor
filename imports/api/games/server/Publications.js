@@ -1,4 +1,6 @@
 import { Meteor } from 'meteor/meteor';
+import { check } from 'meteor/check';
+
 import { GamesCollection } from '/imports/db/GamesCollection';
 
 // All publications must either return a cursor or this.ready()
@@ -10,7 +12,6 @@ Meteor.publish('games', function publishGames() {
         return this.ready();
     }
 
-
-    return GamesCollection.find({});
+    return GamesCollection.find({ players: { $elemMatch: { $eq: this.userId } } } );
 
 });
