@@ -1,7 +1,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
-import { GamesCollection } from '/imports/db/GamesCollection';
+import { GamesCollection } from '/imports/api/games/GamesCollection';
 
 import '/imports/api/games/Methods';
 import '/imports/api/games/server/Publications';

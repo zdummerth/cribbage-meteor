@@ -1,7 +1,7 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 import { HandsCollection } from '/imports/db/HandsCollection';
-import { GamesCollection } from '/imports/db/GamesCollection';
+import { GamesCollection } from '/imports/api/games/GamesCollection';
 
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';

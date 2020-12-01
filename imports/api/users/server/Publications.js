@@ -9,20 +9,12 @@ const userPublicFields = {
 }
 
 Meteor.publish('user', function publishUser() {
+
   const options = {
     fields: userPublicFields
   };
     
   return Meteor.users.find(this.userId, options);
-
-});
-
-Meteor.publish('users', function publishUser() {
-  const options = {
-    fields: userPublicFields
-  };
-    
-  return Meteor.users.find({}, options);
 
 });
 
@@ -38,7 +30,6 @@ Meteor.publish('users.inWaitingRoom', function publishUsersInWaitingRoom() {
     _id: { $ne: this.userId }
   };
   
-  // Only return public fields
   const options = {
     fields: userPublicFields
   };

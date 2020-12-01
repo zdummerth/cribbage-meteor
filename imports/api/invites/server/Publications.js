@@ -4,7 +4,6 @@ import { InvitesCollection } from '/imports/db/InvitesCollection';
 
 Meteor.publish('invites', function publishInvites() {
 
-  //If no user, return ready with no data
   if (!this.userId) {
       return this.ready();
   }

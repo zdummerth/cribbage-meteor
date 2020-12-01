@@ -18,7 +18,8 @@ Meteor.publish('scores', function publishScores(gameId) {
 
   const publicFields = {
     score: 1,
-    userId: 1
+    userId: 1,
+    gameId: 1,
   }
   
   return ScoresCollection.find(selector, { fields: publicFields });

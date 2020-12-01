@@ -1,7 +1,7 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
-import { GamesCollection } from '/imports/db/GamesCollection';
+import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { HandsCollection } from '/imports/db/HandsCollection';
 import { InvitesCollection } from '/imports/db/InvitesCollection';
 

@@ -2,7 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
 import { HandsCollection } from '/imports/db/HandsCollection';
-import { GamesCollection } from '/imports/db/GamesCollection';
+import { GamesCollection } from '/imports/api/games/GamesCollection';
 
 
 Meteor.publish('hand.forGame', function publishGames(gameId) {
@@ -62,7 +62,8 @@ Meteor.publish('opponent.handLength', function publishGames(gameId) {
 
   const publicFields = {
     handLength: 1,
-    userId : 1
+    userId : 1,
+    gameId: 1
   }
 
   return HandsCollection.find(Selector, { fields: publicFields } );
