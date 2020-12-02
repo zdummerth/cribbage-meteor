@@ -15,13 +15,13 @@ RunsCollection.helpers({
   
     },
 
-    hand(id) {
-        const handDoc = HandsCollection.findOne({ runId: this._id, userId: id });
+    hand({ userId, runCards}) {
+        const handDoc = HandsCollection.findOne({ runId: this._id, userId });
     
         if( !!handDoc ) {
             const { discarded, dealt } = handDoc;
             const handId = handDoc._id
-            const hand =  dealt.filter( card => !discarded.includes(card) );
+            const hand =  dealt.filter( card => !discarded.includes(card) && !runCards.includes(card) );
             return { discarded, hand, handId }
 
         }

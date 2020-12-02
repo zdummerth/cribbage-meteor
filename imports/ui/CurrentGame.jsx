@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import styled, { ThemeProvider } from 'styled-components'
+import styled from 'styled-components'
 
 import Card from '/imports/ui/Card';
 
 
 const Container = styled.div`
-
+    width: 100vw;
 `
 
 const Scoreboard = styled.div`
@@ -15,11 +15,14 @@ const Scoreboard = styled.div`
 
 const OpponentHand = styled.div`
     display: flex;
+    justify-content: center;
 `
 
 const MainCardContainer = styled.div`
     display: flex;
-    height: 107px;
+    justify-content: flex-start;
+    align-items: center;
+    height: 200px;
 `
 
 const Run = styled.div`
@@ -28,6 +31,7 @@ const Run = styled.div`
 
 const Hand = styled.div`
     display: flex;
+    justify-content: center;
 `
 
 
@@ -40,7 +44,7 @@ export const CurrentGame = ({
     handId, 
     opponent, 
     discarded, 
-    currentRunCards, 
+    currentRun, 
     addCardToRun, 
     addCardsToCrib 
 }) => {
@@ -54,7 +58,7 @@ export const CurrentGame = ({
     const [ cribCards, setCribCards ] = useState([]);
     const [ tempHand, setTempHand ] = useState(hand);
 
-    const cardWithProps = card => (
+    const cardWithProps = ({ card, scoringEvent }) => (
         <Card 
             id={card}
             setCribCards={setCribCards}
@@ -63,6 +67,7 @@ export const CurrentGame = ({
             tempHand={tempHand}
             isCribSubmitted={isCribSubmitted}
             addCardToRun={addCardToRun}
+            scoringEvent={scoringEvent}
             runId={game.currentRunId}
         />
     )
@@ -89,11 +94,18 @@ export const CurrentGame = ({
             <MainCardContainer>
                 { isCribSubmitted ? (
                     <>
-                        {currentRunCards.map(card => cardWithProps(card))}
+                        {currentRun.cards.map((card, index) => {
+
+                            if (currentRun.scoringEvents.length > 0) {
+                                const scoringEvent = currentRun.scoringEvents.find(ev => ev.cardIndex === index);
+                                return cardWithProps({ card, scoringEvent })
+                            }
+                            return cardWithProps({ card, scoringEvent: null })})
+                        }
                     </>
                 ) : (
                     <>
-                        {cribCards.map(card => cardWithProps(card))}
+                        {cribCards.map(card => cardWithProps({ card, scoringEvent: null }))}
                     </>
                 )}
             </MainCardContainer>
@@ -106,11 +118,11 @@ export const CurrentGame = ({
             <Hand>
                 { isCribSubmitted ? (
                     <>
-                        {hand.map(card => cardWithProps(card))}
+                        {hand.map(card => cardWithProps({ card, scoringEvent: null }))}
                     </>
                 ) : (
                     <>
-                        {tempHand.map(card => cardWithProps(card))}
+                        {tempHand.map(card => cardWithProps({ card, scoringEvent: null }))}
                     </>
                 )}
             </Hand>

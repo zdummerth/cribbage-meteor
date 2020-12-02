@@ -23,11 +23,15 @@ Meteor.publish('run.forGame', function publishRunForGame(gameId) {
     const publicFields = {
         starterCard: 1,
         gameId: 1,
+        currentRun: 1,
         currentRunCards: 1,
-        pastRunCards: 1,
+        currentRunTotal: 1,
+        scoringEvents: 1,
+        pastRuns: 1,
         completed: 1
     }
 
-    return RunsCollection.find({ gameId: gameId }, { fields: publicFields} );
+    return RunsCollection.find({ gameId: gameId }, { fields: publicFields });
+
 
 });

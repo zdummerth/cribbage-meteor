@@ -58,6 +58,7 @@ export const createGame = new ValidatedMethod({
     InvitesCollection.remove(inviteId);
 
     const runId = createRun.call(gameId);
+
     GamesCollection.update(gameId, {
       $set: {
         currentRunId: runId

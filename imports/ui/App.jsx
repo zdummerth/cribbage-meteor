@@ -7,9 +7,29 @@ import { Invites } from './Invites';
 import { GamesListing } from './GamesListing';
 import { CurrentGameContainer } from './CurrentGameContainer';
 
+import styled from 'styled-components';
+
+
 
 import { removeGame } from '../api/games/Methods'
 import { createInvite } from '../api/invites/Methods'
+
+
+const User = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px 0;
+
+  background: linear-gradient(to right bottom, orange, white, orange, white 100%);
+  
+  #username {
+    font-weight: bold;
+    font-size: 30px;
+  }
+`
+
+
 
 
 const sendInvite = receiverId => createInvite.call(receiverId);
@@ -53,12 +73,11 @@ export const App = ({ user, usersInWaitingRoom, invites, games }) => {
       <div className="main">
         {user ? (
           <>
-            <div className="user" onClick={logout}>
-              {user.username} 🚪
-            </div>
+            <User>
+              <div id='username'>{user.username}</div>
+              <div onClick={logout}>Logout</div>
+            </User>
 
-
-            <button onClick={() => console.log(user)}>user</button>
             { currentGame ? (
               <CurrentGameContainer 
                 game={currentGame}

@@ -1,6 +1,16 @@
 import React from 'react';
 import { Meteor } from 'meteor/meteor';
 
+import styled from 'styled-components';
+
+const PlayButton = styled.button`
+    background: linear-gradient(to right bottom, white, green, green, white 100%);
+`
+
+const DeleteButton = styled.button`
+    background: linear-gradient(to right bottom, white, red, red, white 100%);
+`
+
 export const GamesListingItem = ({ game, onDeleteClick, playGame }) => {
     
     const selector = { _id: { $in: game.players } };
@@ -14,11 +24,11 @@ export const GamesListingItem = ({ game, onDeleteClick, playGame }) => {
             <span>
                 {usernames}
             </span>
-            <button onClick={() => playGame({ game })}>
+            <PlayButton onClick={() => playGame({ game })}>
                  Play Game
-            </button>
+            </PlayButton>
 
-            <button onClick={() => onDeleteClick(game)}>Delete Game</button>
+            <DeleteButton onClick={() => onDeleteClick(game)}>Delete Game</DeleteButton>
         </li>
     )
 }

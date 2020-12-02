@@ -1,4 +1,14 @@
 import React from 'react';
+import styled from 'styled-components';
+
+const ImageWrapper = styled.div`
+    flex: 1 1 80px; 
+    max-width: 80px;
+`
+
+const Image = styled.img`
+    width: 100%;
+`
 
 export default function Card({ 
     id, 
@@ -8,10 +18,12 @@ export default function Card({
     setCribCards, 
     setTempHand, 
     runId,
+    scoringEvent,
     addCardToRun
 }) {
 
     const handleClick = card => {
+        if(id === 'blue_back') return
         if(isCribSubmitted) {
             addCardToRun({ card, runId })
         } else {
@@ -34,8 +46,14 @@ export default function Card({
 
 
     return (
-        <div onClick={() => handleClick(id)}>
-            <img style={{width: '70px', height: '107px'}} src={`/cardImages/${id}.jpg`} alt={'two'}/>
-        </div>
+        <ImageWrapper onClick={() => handleClick(id)}>
+            { scoringEvent ? (
+                <>
+                    <div>{scoringEvent.type}</div>
+                    <div>{scoringEvent.points}</div>
+                </>
+            ) : null}
+            <Image src={`/cardImages/${id}.jpg`} alt={'two'}/>
+        </ImageWrapper>
     )
 }

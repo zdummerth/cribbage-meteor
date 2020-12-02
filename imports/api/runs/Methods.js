@@ -12,7 +12,7 @@ import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import { createHand } from '../hands/Methods'
 import { createScores } from '../scores/Methods'
 
-import { deal } from '../cardFunctions.js'
+import { deal, getRunPoints } from '../cardFunctions.js'
 
 
 
@@ -54,8 +54,10 @@ export const createRun = new ValidatedMethod({
       gameId,
       createdAt: timestamp,
       starterCard,
+      currentRun: { cards: [], scoringEvents: [], total: 0 },
       currentRunCards: [],
-      pastRunCards: [],
+      currentRunTotal: 0,
+      pastRuns: [],
       completed: false
     });
 
@@ -116,21 +118,46 @@ export const addToRun = new ValidatedMethod({
       throw new Meteor.Error('could not find run');
     }
 
-    const { currentRunCards, pastRunCards } = run;
-    const { discarded, dealt } = hand
+    const { currentRun, pastRuns } = run;
+    const { discarded, dealt } = hand;
+
+
+    const allPastRunCards = [];
+    pastRuns.forEach(run => allPastRunCards.push(run.cards));
+
 
 
     // pastRunCards is an array of arrays so must be flattened
-    const cardInRun = currentRunCards.includes(card) || pastRunCards.flat().includes(card);
-    const cardInHand = dealt.includes(card);
-    const cardInDiscard = discarded.includes(card);
+    const cardInRun = card => currentRun.cards.includes(card) || allPastRunCards.flat().includes(card);
+    const cardInHand = card => dealt.includes(card);
+    const cardInDiscard = card => discarded.includes(card);
 
-    if(cardInRun || cardInDiscard || !cardInHand) {
+
+
+    const validCards = dealt.filter(card => (!cardInRun(card) && !cardInDiscard(card) && cardInHand(card)));
+
+    if(!validCards.includes(card)) {
       throw new Meteor.Error('you must play a valid card');
     }
 
+
+    console.log('run before update', run.currentRun.cards);
+    console.log('run with new card', [...run.currentRun.cards, card]);
+
+    const newRun = [...run.currentRun.cards, card];
+
+    const { scoringEvents, runTotal } = getRunPoints(newRun);
+    const newScoringEvents = [ ...run.currentRun.scoringEvents, ...scoringEvents]
+    console.log({ scoringEvents, runTotal });
+
+    // const newCards = validCards.filter(c => c !== card )
+
+    
+
+
     RunsCollection.update( runId, {
-      $push: { currentRunCards: card }
+      $push: { "currentRun.cards": card },
+      $set: { "currentRun.total": runTotal, "currentRun.scoringEvents": newScoringEvents },
     });
 
   }

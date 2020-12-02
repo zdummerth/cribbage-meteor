@@ -99,7 +99,7 @@ export const getRunPoints = run => {
     const checkForStraights = run => {
         // base case for recursion
         if (run.length < 3) return false
-        const orderNumbers = run.map(card => getOrder)
+        const orderNumbers = run.map(card => getOrder(card))
         const max = Math.max(...orderNumbers);
         const min = Math.min(...orderNumbers);
 
@@ -113,6 +113,7 @@ export const getRunPoints = run => {
     }
 
     const straight = checkForStraights(run);
+    
     if (straight) {
         scoringEvents.push({
             type: 'Run',
@@ -126,6 +127,10 @@ export const getRunPoints = run => {
     }
     if (runTotal == 31) {
         scoringEvents.push({ type: '31', points: 1 })
+    }
+
+    if(scoringEvents.length > 0) {
+        scoringEvents.forEach(ev => ev.cardIndex = run.length - 1)
     }
 
     return { scoringEvents, runTotal }
