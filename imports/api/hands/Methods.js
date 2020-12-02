@@ -24,50 +24,7 @@ export const createHand = new ValidatedMethod({
       throw new Meteor.Error('Not authorized.');
     }
 
-    const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
-
-
-    // console.log({game})
-
-    if (!game) {
-      throw new Meteor.Error('Could Not find Game');
-    }
-
-    const opponentId = game.players.find(playerId => playerId !== this.userId);
-
-    const deck = deal(2, 6);
-
-    const userHand = deck.players[0].hand;
-    const oppHand = deck.players[1].hand;
-
-
-    // console.log({userHand, oppHand})
-
-    const timestamp = new Date();
-
-    const handOneId = HandsCollection.insert({
-      createdAt: timestamp,
-      dealt: userHand,
-      discarded: [],
-      completed: false,
-      userId: this.userId,
-      gameId,
-      handLength: 6
-    });
-
-    const handTwoId = HandsCollection.insert({
-      createdAt: timestamp,
-      dealt: oppHand,
-      discarded: [],
-      completed: false,
-      userId: opponentId,
-      gameId,
-      handLength: 6
-    });
-
-    // console.log({handOneId, handTwoId})
-
-
+      //hands are created when run is created
   }
 });
 
@@ -111,7 +68,7 @@ export const discardToCrib = new ValidatedMethod({
       throw new Meteor.Error('Access denied.');
     }
 
-    HandsCollection.updata(handId, { $set: { discarded: cards } } );
+    HandsCollection.update(handId, { $set: { discarded: cards } } );
     
   }
 });

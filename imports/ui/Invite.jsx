@@ -55,12 +55,6 @@ export const Invite = ({ invite, isSender }) => {
         otherId: invite.senderId
     }
 
-    console.log('sender', sender)
-    console.log('receiver', receiver)
-
-
-
-
 
     return (
         <StyledInvite>

@@ -3,12 +3,14 @@ import { Meteor } from 'meteor/meteor';
 
 import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { HandsCollection } from '/imports/db/HandsCollection';
+import { RunsCollection } from '/imports/api/runs/RunsCollection';
+
 import { InvitesCollection } from '/imports/db/InvitesCollection';
 
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
-import { createHand } from '../hands/Methods'
-import { createScores } from '../scores/Methods'
+import { createScores } from '../scores/Methods';
+import { createRun } from '../runs/Methods';
 
 
 
@@ -24,12 +26,9 @@ export const createGame = new ValidatedMethod({
 
   run({otherId, inviteId}) {
 
-    console.log({inviteId, otherId})
-
     if (!this.userId) {
       throw new Meteor.Error('Not authorized.');
     }
-
 
     if(otherId === this.userId) {
       throw new Meteor.Error('You cannot create a game with yourself');
@@ -47,19 +46,22 @@ export const createGame = new ValidatedMethod({
       throw new Meteor.Error('There must be an invite to create a game');
     }
 
-
-
     const gameId = GamesCollection.insert({
       createdAt: new Date(),
       players: [ this.userId, otherId ],
       completed: false,
-      run: [],
-      crib: []
+      currentRunId: '',
+      pastRunIds: []
     });
 
     InvitesCollection.remove(inviteId);
 
-    createHand.call(gameId);
+    const runId = createRun.call(gameId);
+    GamesCollection.update(gameId, {
+      $set: {
+        currentRunId: runId
+      }
+    })
     createScores.call(gameId);
 
   }

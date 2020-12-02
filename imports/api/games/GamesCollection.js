@@ -12,51 +12,40 @@ import { ScoresCollection } from '/imports/db/ScoresCollection';
 export const GamesCollection = new Mongo.Collection('games');
 
 GamesCollection.helpers({
-  opponent() {
-    let opponentData = {
-      username: '',
-      _id: '',
-      score: '',
-      cardsRemaining: 1
+  getUsername(id) {
+
+    const user = Meteor.users.findOne(id);
+
+    if( !!user ) {
+      return user.username
     }
-    const opp = Meteor.users.findOne( { _id: { $ne: Meteor.userId(), $in: this.players } });
-    if( !!opp ) {
 
-      const scoreDoc = ScoresCollection.findOne({ gameId: this._id, userId: opp._id});
-      const handLengthDoc = HandsCollection.findOne({ gameId: this._id, userId: opp._id});
-
-      if( !!scoreDoc && !!handLengthDoc ) {
-        opponentData = {
-          username: opp.username,
-          _id: opp._id,
-          score: scoreDoc.score,
-          handLength: handLengthDoc.handLength
-        }
-      }
-    } 
-
-    return opponentData
+    return 'Could not find user'
 
   },
-  score() {
-    const scoreDoc = ScoresCollection.findOne({ gameId: this._id, userId: Meteor.userId()});
+  score(id) {
+    const scoreDoc = ScoresCollection.findOne({ gameId: this._id, userId: id});
+
     if( !!scoreDoc ) {
       return scoreDoc.score
     }
     else {
       return -999
     }
+
   }, 
   hand() {
     const handDoc = HandsCollection.findOne({ gameId: this._id, userId: Meteor.userId()});
 
     if( !!handDoc ) {
       const { discarded, dealt } = handDoc;
-      return dealt.filter( card => !discarded.includes(card) );
+      const hand =  dealt.filter( card => !discarded.includes(card) );
+      return { discarded, hand }
     }
     else {
-      return ['blue_back']
+      const noData = ['blue_back']
+      return { discarded: noData, hand: noData}
     }
-    
-  }
+
+  },
 });

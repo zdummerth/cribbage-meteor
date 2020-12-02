@@ -13,7 +13,8 @@ import '/imports/api/hands/Methods';
 import '/imports/api/hands/server/Publications';
 import '/imports/api/scores/Methods';
 import '/imports/api/scores/server/Publications';
-
+import '/imports/api/runs/Methods';
+import '/imports/api/runs/server/Publications';
 
 
 const players = [

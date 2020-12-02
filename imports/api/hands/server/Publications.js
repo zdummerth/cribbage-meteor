@@ -3,24 +3,26 @@ import { check } from 'meteor/check';
 
 import { HandsCollection } from '/imports/db/HandsCollection';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
+import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
 
-Meteor.publish('hand.forGame', function publishGames(gameId) {
-  check(gameId, String)
+
+Meteor.publish('hand.forRun', function publishHandForRun(runId) {
+  check(runId, String)
 
   //If no user, return ready with no data
   if (!this.userId) {
       return this.ready();
   }
 
-  const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
+  const hand = HandsCollection.findOne({ runId: runId, userId: this.userId });
 
-  if (!game) {
+  if (!hand) {
     throw new Meteor.Error('Access denied.');
   }
 
   const selector = {
-    gameId,
+    runId,
     userId: this.userId
   }
 
@@ -29,22 +31,25 @@ Meteor.publish('hand.forGame', function publishGames(gameId) {
     discarded: 1,
     completed: 1,
     userId: 1,
-    gameId: 1
+    runId: 1
   }
 
   return HandsCollection.find(selector, { fields: publicFields });
 
 });
 
-Meteor.publish('opponent.handLength', function publishGames(gameId) {
-  check(gameId, String)
+Meteor.publish('opponent.handLength', function publishGames({ runId, oppId, gameId }) {
+  check(oppId, String);
+  check(runId, String);
+  check(gameId, String);
+
 
   //If no user, return ready with no data
   if (!this.userId) {
       return this.ready();
   }
 
-  const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
+  const game = GamesCollection.findOne({ _id: gameId, currentRunId: runId,  players: { $elemMatch: { $eq: this.userId, $eq: oppId } } });
 
   // query below works if I need to check against the userId and opp Id
   // const shellQuery = db.games.find({ _id: "moRTTM5fBghKZFfmm", players: { $elemMatch: { $eq: "h25Tr3MDj2uJWkpox" }, $elemMatch: { $eq: "YW523xxJqQnMgFwZH" } } })
@@ -53,17 +58,16 @@ Meteor.publish('opponent.handLength', function publishGames(gameId) {
     throw new Meteor.Error('Access denied.');
   }
 
-  const opponentId = game.players.find(playerId => playerId !== this.userId);
 
   const Selector = {
-    gameId,
-    userId: opponentId
+    runId,
+    userId: oppId
   }
 
   const publicFields = {
     handLength: 1,
     userId : 1,
-    gameId: 1
+    runId: 1
   }
 
   return HandsCollection.find(Selector, { fields: publicFields } );
