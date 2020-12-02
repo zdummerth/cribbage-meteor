@@ -23,8 +23,8 @@ Meteor.publish('run.forGame', function publishRunForGame(gameId) {
     const publicFields = {
         starterCard: 1,
         gameId: 1,
-        currentCards: 1,
-        pastCards: 1,
+        currentRunCards: 1,
+        pastRunCards: 1,
         completed: 1
     }
 

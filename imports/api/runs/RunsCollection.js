@@ -20,13 +20,14 @@ RunsCollection.helpers({
     
         if( !!handDoc ) {
             const { discarded, dealt } = handDoc;
+            const handId = handDoc._id
             const hand =  dealt.filter( card => !discarded.includes(card) );
-            return { discarded, hand }
+            return { discarded, hand, handId }
 
         }
         else {
             const noData = ['blue_back']
-            return { discarded: noData, hand: noData}
+            return { discarded: noData, hand: noData, handId: ''}
         }
   
     },

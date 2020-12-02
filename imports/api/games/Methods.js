@@ -51,7 +51,8 @@ export const createGame = new ValidatedMethod({
       players: [ this.userId, otherId ],
       completed: false,
       currentRunId: '',
-      pastRunIds: []
+      pastRunIds: [],
+      turnId: this.userId
     });
 
     InvitesCollection.remove(inviteId);

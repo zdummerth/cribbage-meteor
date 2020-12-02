@@ -1,11 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export default function Card({ id, isCribSubmitted, cribCards, tempHand, setCribCards, setTempHand }) {
+export default function Card({ 
+    id, 
+    isCribSubmitted, 
+    cribCards, 
+    tempHand, 
+    setCribCards, 
+    setTempHand, 
+    runId,
+    addCardToRun
+}) {
+
+    const handleClick = card => {
+        if(isCribSubmitted) {
+            addCardToRun({ card, runId })
+        } else {
+            toggleCrib(card)
+        }
+    }
 
     const inCrib = card => cribCards.includes(card);
     const inTempHand = card => tempHand.includes(card);
-
-
 
     const toggleCrib = card => {
         if (!inCrib(card) && cribCards.length < 2) {
@@ -19,7 +34,7 @@ export default function Card({ id, isCribSubmitted, cribCards, tempHand, setCrib
 
 
     return (
-        <div onClick={() => toggleCrib(id)}>
+        <div onClick={() => handleClick(id)}>
             <img style={{width: '70px', height: '107px'}} src={`/cardImages/${id}.jpg`} alt={'two'}/>
         </div>
     )

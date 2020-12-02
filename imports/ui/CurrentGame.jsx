@@ -31,7 +31,19 @@ const Hand = styled.div`
 `
 
 
-export const CurrentGame = ({ game, closeGame, user, userScore, hand, opponent, discarded, currentRun, submitToRun, submitToCrib }) => {
+export const CurrentGame = ({ 
+    game, 
+    closeGame, 
+    user, 
+    userScore, 
+    hand, 
+    handId, 
+    opponent, 
+    discarded, 
+    currentRunCards, 
+    addCardToRun, 
+    addCardsToCrib 
+}) => {
 
     let opponentCards = [];
     for(let i = 0; i < opponent.handLength; i++) {
@@ -50,13 +62,14 @@ export const CurrentGame = ({ game, closeGame, user, userScore, hand, opponent, 
             cribCards={cribCards}
             tempHand={tempHand}
             isCribSubmitted={isCribSubmitted}
+            addCardToRun={addCardToRun}
+            runId={game.currentRunId}
         />
     )
 
     return (
         <Container>
                 
-
             <Scoreboard>
                 <div>
                     <p>{user.username}</p>
@@ -76,7 +89,7 @@ export const CurrentGame = ({ game, closeGame, user, userScore, hand, opponent, 
             <MainCardContainer>
                 { isCribSubmitted ? (
                     <>
-                        {currentRun.map(card => cardWithProps(card))}
+                        {currentRunCards.map(card => cardWithProps(card))}
                     </>
                 ) : (
                     <>
@@ -84,6 +97,10 @@ export const CurrentGame = ({ game, closeGame, user, userScore, hand, opponent, 
                     </>
                 )}
             </MainCardContainer>
+            
+            { cribCards.length === 2 && !isCribSubmitted? (
+                <button onClick={() => addCardsToCrib({ cards: cribCards, handId })}>Submit Crib</button>
+            ) : null}
 
             <p>Player Hand</p>
             <Hand>

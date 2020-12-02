@@ -1,4 +1,3 @@
-import { Meteor } from 'meteor/meteor';
 import React, { useState } from 'react';
 import { Invite } from './Invite';
 
@@ -31,30 +30,24 @@ export const Invites = ({ invites, userId }) => {
     const BtnText = sentIsVisible ? 'Show Received Invites' : 'Show Sent Invites'
 
     return (
-        <>
-            <div>
+        <div>
+            <h3>Invites</h3>
 
-                <h3>Invites</h3>
-
-                <button onClick={() => setSentIsVisibel(!sentIsVisible)}>{BtnText}</button>
-
-                {
-                    sentIsVisible ?
-                    <>
-                        <p>Sent</p>
-                        <div>
-                            {sent}
-                        </div> 
-                    </>
-                    :
-                    <>
-                        <p>Received</p>
-                        <div>
-                            {received}
-                        </div>
-                    </>
-                }
-            </div>
-        </>
+            <button onClick={() => setSentIsVisibel(!sentIsVisible)}>{BtnText}</button>
+                {sentIsVisible ?
+                <>
+                    <p>Sent</p>
+                    <div>
+                        {sent}
+                    </div> 
+                </>
+                :
+                <>
+                    <p>Received</p>
+                    <div>
+                        {received}
+                    </div>
+                </>}
+        </div>
     )
 }

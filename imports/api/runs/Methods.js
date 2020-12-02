@@ -54,8 +54,8 @@ export const createRun = new ValidatedMethod({
       gameId,
       createdAt: timestamp,
       starterCard,
-      currentCards: [],
-      pastCards: [],
+      currentRunCards: [],
+      pastRunCards: [],
       completed: false
     });
 
@@ -81,6 +81,57 @@ export const createRun = new ValidatedMethod({
     });
 
     return runId
+
+  }
+});
+
+export const addToRun = new ValidatedMethod({
+  name: 'runs.addToRun',
+  validate({ runId, card}) {
+    check(runId, String);
+    check(card, String);
+  },
+
+  run({ runId, card }) {
+
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
+
+    // const run = RunsCollection.findOne({ _id: runId });
+    const game = GamesCollection.findOne({ currentRunId: runId, players: { $elemMatch: { $eq: this.userId } } } );
+    const hand = HandsCollection.findOne({ runId: runId, userId: this.userId } );
+    const run = RunsCollection.findOne({ _id: runId } );
+
+
+    if (!game) {
+      throw new Meteor.Error('There must be a game to add to run');
+    }
+
+    if (!hand) {
+      throw new Meteor.Error('could not find hand');
+    }
+
+    if (!run) {
+      throw new Meteor.Error('could not find run');
+    }
+
+    const { currentRunCards, pastRunCards } = run;
+    const { discarded, dealt } = hand
+
+
+    // pastRunCards is an array of arrays so must be flattened
+    const cardInRun = currentRunCards.includes(card) || pastRunCards.flat().includes(card);
+    const cardInHand = dealt.includes(card);
+    const cardInDiscard = discarded.includes(card);
+
+    if(cardInRun || cardInDiscard || !cardInHand) {
+      throw new Meteor.Error('you must play a valid card');
+    }
+
+    RunsCollection.update( runId, {
+      $push: { currentRunCards: card }
+    });
 
   }
 });

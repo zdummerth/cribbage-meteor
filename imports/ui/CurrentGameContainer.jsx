@@ -5,14 +5,18 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
-import { createRun } from '/imports/api/runs/Methods';
+// import { createRun } from '/imports/api/runs/Methods';
+import { discardToCrib } from '/imports/api/hands/Methods';
+import { addToRun } from '/imports/api/runs/Methods';
+
+
 
 
 
 import { CurrentGame } from '/imports/ui/CurrentGame';
 
-const addCardToRun = value => value;
-const addCardToCrib = value => value;
+const addCardToRun = ({ card, runId }) => addToRun.call({ card, runId });
+const addCardsToCrib = ({ cards, handId }) => discardToCrib.call({ cards, handId });
 
 
 export const CurrentGameContainer = ({ game, closeGame, user }) => {
@@ -21,9 +25,17 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
 
     console.log({game})
 
-    const { userScore, hand, loading, opponent, gameDocExists, discarded, runDocExists, currentRun } = useTracker(() => {
-
-        const playerHandHandler = Meteor.subscribe('hand.forRun', game.currentRunId);
+    const { 
+        userScore, 
+        hand, 
+        loading, 
+        opponent, 
+        gameDocExists, 
+        discarded, 
+        runDocExists, 
+        currentRunCards, 
+        handId 
+    } = useTracker(() => {
 
         const oppHandLenghthSubData = {
             gameId: game._id,
@@ -31,6 +43,7 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
             oppId
         }
         const oppHandLengthHandler = Meteor.subscribe('opponent.handLength', oppHandLenghthSubData);
+        const playerHandHandler = Meteor.subscribe('hand.forRun', game.currentRunId);
         const scoresHandler = Meteor.subscribe('scores', game._id);
         const runHandler = Meteor.subscribe('run.forGame', game._id);
 
@@ -54,13 +67,23 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
                 handLength: runDoc.getOppHandLength(oppId)
             }
 
-            const { currentRun } = runDoc
+            const { currentRunCards } = runDoc
 
             const userScore = gameDoc.score(user._id);
 
-            const { hand, discarded } = runDoc.hand(user._id);
+            const { hand, discarded, handId } = runDoc.hand(user._id);
 
-            return { opponent, userScore, hand, gameDocExists, loading, discarded, runDocExists, currentRun }
+            return { 
+                opponent, 
+                userScore, 
+                hand, 
+                handId,
+                gameDocExists, 
+                loading, 
+                discarded, 
+                runDocExists, 
+                currentRunCards 
+            }
 
         } else {
             console.log('run doc does not exist')
@@ -78,11 +101,14 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
                 loading={loading}
                 userScore={userScore}
                 hand={hand}
+                handId={handId}
                 discarded={discarded}
                 game={game}
                 closeGame={closeGame}
                 user={user}
-                currentRun={currentRun}
+                currentRunCards={currentRunCards}
+                addCardsToCrib={addCardsToCrib}
+                addCardToRun={addCardToRun}
             />
         ) : (
             <div>Game does not exist</div>

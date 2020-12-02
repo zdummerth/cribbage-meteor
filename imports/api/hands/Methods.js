@@ -53,10 +53,11 @@ export const removeHand = new ValidatedMethod({
 export const discardToCrib = new ValidatedMethod({
   name: 'hand.discardToCrib',
   validate({ cards, handId }) {
-    check(cards, [ String ])
+    check(cards, [ String ]);
+    check(handId, String);
   },
 
-  run(cards) {
+  run({ cards, handId }) {
 
     if (!this.userId) {
       throw new Meteor.Error('Not authorized.');
@@ -68,7 +69,9 @@ export const discardToCrib = new ValidatedMethod({
       throw new Meteor.Error('Access denied.');
     }
 
-    HandsCollection.update(handId, { $set: { discarded: cards } } );
+    HandsCollection.update(handId, { 
+      $set: { discarded: cards, handLength: 4 } 
+    } );
     
   }
 });
