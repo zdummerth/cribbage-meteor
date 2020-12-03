@@ -18,12 +18,14 @@ export default function Card({
     setCribCards, 
     setTempHand, 
     runId,
-    scoringEvent,
-    addCardToRun
+    scoringEventsForCard,
+    addCardToRun,
+    noClick
 }) {
 
     const handleClick = card => {
-        if(id === 'blue_back') return
+        
+        if(noClick) return
         if(isCribSubmitted) {
             addCardToRun({ card, runId })
         } else {
@@ -47,10 +49,15 @@ export default function Card({
 
     return (
         <ImageWrapper onClick={() => handleClick(id)}>
-            { scoringEvent ? (
+            { scoringEventsForCard ? (
                 <>
-                    <div>{scoringEvent.type}</div>
-                    <div>{scoringEvent.points}</div>
+                    {scoringEventsForCard.map(ev => (
+                        <>
+                            <div>{ev.type}</div>
+                            <div>{ev.points}</div>
+                        </>
+                    ))}
+
                 </>
             ) : null}
             <Image src={`/cardImages/${id}.jpg`} alt={'two'}/>

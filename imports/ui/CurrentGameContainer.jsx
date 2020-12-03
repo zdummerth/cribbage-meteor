@@ -59,7 +59,7 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
         console.log('currentRun id', game.currentRunId)
 
         const runDoc = RunsCollection.findOne({ _id: game.currentRunId, completed: false });
-        console.log({runDoc})
+        // console.log({runDoc})
         const runDocExists = !loading && !!gameDoc;
 
 

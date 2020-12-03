@@ -141,16 +141,16 @@ export const addToRun = new ValidatedMethod({
     }
 
 
-    console.log('run before update', run.currentRun.cards);
-    console.log('run with new card', [...run.currentRun.cards, card]);
+    // console.log('run before update', run.currentRun.cards);
+    // console.log('run with new card', [...run.currentRun.cards, card]);
 
     const newRun = [...run.currentRun.cards, card];
 
     const { scoringEvents, runTotal } = getRunPoints(newRun);
     const newScoringEvents = [ ...run.currentRun.scoringEvents, ...scoringEvents]
-    console.log({ scoringEvents, runTotal });
+    // console.log({ scoringEvents, runTotal });
 
-    // const newCards = validCards.filter(c => c !== card )
+    const newHandLength = validCards.filter(c => c !== card ).length;
 
     
 
@@ -158,6 +158,10 @@ export const addToRun = new ValidatedMethod({
     RunsCollection.update( runId, {
       $push: { "currentRun.cards": card },
       $set: { "currentRun.total": runTotal, "currentRun.scoringEvents": newScoringEvents },
+    });
+
+    HandsCollection.update( hand._id, {
+      $set: { handLength: newHandLength },
     });
 
   }

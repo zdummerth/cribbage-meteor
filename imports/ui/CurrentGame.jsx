@@ -51,14 +51,14 @@ export const CurrentGame = ({
 
     let opponentCards = [];
     for(let i = 0; i < opponent.handLength; i++) {
-        opponentCards.push(<Card id={'blue_back'} key={i}/>)
+        opponentCards.push(<Card id={'blue_back'} key={i} noClick={true} />)
     }
 
     const isCribSubmitted = discarded.length === 2;
     const [ cribCards, setCribCards ] = useState([]);
     const [ tempHand, setTempHand ] = useState(hand);
 
-    const cardWithProps = ({ card, scoringEvent }) => (
+    const cardWithProps = ({ card, scoringEventsForCard, noClick }) => (
         <Card 
             id={card}
             setCribCards={setCribCards}
@@ -67,8 +67,9 @@ export const CurrentGame = ({
             tempHand={tempHand}
             isCribSubmitted={isCribSubmitted}
             addCardToRun={addCardToRun}
-            scoringEvent={scoringEvent}
+            scoringEventsForCard={scoringEventsForCard}
             runId={game.currentRunId}
+            noClick={noClick}
         />
     )
 
@@ -91,21 +92,25 @@ export const CurrentGame = ({
                 { opponentCards }
             </OpponentHand>
 
+            <div>Run Total:</div>
+            <div>{currentRun.total}</div>
             <MainCardContainer>
                 { isCribSubmitted ? (
                     <>
                         {currentRun.cards.map((card, index) => {
 
                             if (currentRun.scoringEvents.length > 0) {
-                                const scoringEvent = currentRun.scoringEvents.find(ev => ev.cardIndex === index);
-                                return cardWithProps({ card, scoringEvent })
+                                const scoringEventsForCard = currentRun.scoringEvents.filter(ev => ev.cardIndex === index);
+                                console.log({scoringEventsForCard})
+                                return cardWithProps({ card, scoringEventsForCard, noClick: false })
                             }
-                            return cardWithProps({ card, scoringEvent: null })})
+
+                            return cardWithProps({ card, scoringEventsForCard: null, noClick: true })})
                         }
                     </>
                 ) : (
                     <>
-                        {cribCards.map(card => cardWithProps({ card, scoringEvent: null }))}
+                        {cribCards.map(card => cardWithProps({ card, scoringEventsForCard: null, noClick: false }))}
                     </>
                 )}
             </MainCardContainer>
@@ -118,11 +123,11 @@ export const CurrentGame = ({
             <Hand>
                 { isCribSubmitted ? (
                     <>
-                        {hand.map(card => cardWithProps({ card, scoringEvent: null }))}
+                        {hand.map(card => cardWithProps({ card, scoringEventsForCard: null, noClick: false }))}
                     </>
                 ) : (
                     <>
-                        {tempHand.map(card => cardWithProps({ card, scoringEvent: null }))}
+                        {tempHand.map(card => cardWithProps({ card, scoringEventsForCard: null, noClick: false }))}
                     </>
                 )}
             </Hand>
