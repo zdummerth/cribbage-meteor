@@ -1,5 +1,5 @@
 import { Meteor } from 'meteor/meteor';
-import { InvitesCollection } from '/imports/db/InvitesCollection';
+import { InvitesCollection } from '/imports/api/invites/InvitesCollection';
 
 
 const userPublicFields = {

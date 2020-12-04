@@ -1,7 +1,5 @@
-import { Meteor } from 'meteor/meteor';
-
 import { Mongo } from 'meteor/mongo';
-import { HandsCollection } from '/imports/db/HandsCollection';
+import { HandsCollection } from '/imports/api/hands/HandsCollection';
 
 
 export const RunsCollection = new Mongo.Collection('runs');

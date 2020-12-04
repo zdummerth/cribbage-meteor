@@ -1,13 +1,14 @@
 import { Meteor } from 'meteor/meteor';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
-import { InvitesCollection } from '/imports/db/InvitesCollection';
-import { ScoresCollection } from '/imports/db/ScoresCollection';
+import { InvitesCollection } from '/imports/api/invites/InvitesCollection';
 
 
 import { App } from '/imports/ui/App';
 import { LoginForm } from '/imports/ui/LoginForm';
+
+const setInWaitingRoom = () => Meteor.call('users.setInWaitingRoom');
 
 
 export const AppContainer = () => {
@@ -32,9 +33,6 @@ export const AppContainer = () => {
 
         const usersInWaitingRoom = Meteor.users.find({ _id: { $ne: Meteor.userId() } } ).fetch();
 
-        // const usersInWaitingRoom = Meteor.users.find({ _id: 'test' } ).fetch();
-
-
         const invites = InvitesCollection.find({}).fetch();
 
         const games = GamesCollection.find({}).fetch();
@@ -52,6 +50,7 @@ export const AppContainer = () => {
                     usersInWaitingRoom={usersInWaitingRoom}
                     invites={invites}
                     games={games}
+                    setInWaitingRoom={setInWaitingRoom}
                 />
             ) : (
                 <LoginForm />

@@ -2,11 +2,8 @@ import { Meteor } from 'meteor/meteor';
 
 import { Mongo } from 'meteor/mongo';
 
-import { InvitesCollection } from '/imports/db/InvitesCollection';
-import { HandsCollection } from '/imports/db/HandsCollection';
-import { ScoresCollection } from '/imports/db/ScoresCollection';
-
-
+import { HandsCollection } from '/imports/api/hands/HandsCollection';
+import { ScoresCollection } from '/imports/api/scores/ScoresCollection';
 
 
 export const GamesCollection = new Mongo.Collection('games');

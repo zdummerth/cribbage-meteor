@@ -1,15 +1,10 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
-import { HandsCollection } from '/imports/db/HandsCollection';
+import { HandsCollection } from '/imports/api/hands/HandsCollection';
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
 
-
-
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
-import { createGame } from '../games/Methods'
-
-import { deal } from '../cardFunctions.js'
 
 
 
@@ -27,6 +22,7 @@ export const createHand = new ValidatedMethod({
     }
 
       //hands are created when run is created
+      // need to switch hand creation to this method
   }
 });
 
@@ -103,7 +99,7 @@ export const removeHand = new ValidatedMethod({
       throw new Meteor.Error('Not authorized.');
     }
 
-    const hand = HandsCollection.findOne();
+    const hand = HandsCollection.findOne(({_id: handId, userId: this.userId}));
 
     if (!hand) {
       throw new Meteor.Error('Access denied.');

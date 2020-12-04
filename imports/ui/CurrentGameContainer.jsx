@@ -5,26 +5,16 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
-// import { createRun } from '/imports/api/runs/Methods';
 import { discardToCrib, setIsGo } from '/imports/api/hands/Methods';
 import { addToRun } from '/imports/api/runs/Methods';
-import { nextTurn } from '/imports/api/games/Methods';
-
 
 import { checkIsGo } from '/imports/api/cardFunctions';
 
-
-
-
 import { CurrentGame } from '/imports/ui/CurrentGame';
 
-const addCardToRun = ({ card, runId }) => {
-    const validCards = addToRun.call({ card, runId})
-    // console.log({validCards})
-};
+const addCardToRun = ({ card, runId }) => addToRun.call({ card, runId});
 const addCardsToCrib = ({ cards, handId }) => discardToCrib.call({ cards, handId });
-const setPlayerGo = ({ runId, handId }) => setIsGo.call({ runId, handId });
-
+const setPlayerGo = ({ runId, handId, gameId }) => setIsGo.call({ runId, handId, gameId });
 
 
 export const CurrentGameContainer = ({ game, closeGame, user }) => {
@@ -129,15 +119,11 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
             // Still need to write this part of the game
 
         } else if(!isGo && isPlayerGo) {
-            setIsGo.call({ handId, runId, gameId: game._id });
+            setPlayerGo({ handId, runId, gameId: game._id });
         } 
 
     }
 
-    
-
-
-     
     return (
         <>
         { loading ? <div>loading.....</div> : gameDocExists ? (

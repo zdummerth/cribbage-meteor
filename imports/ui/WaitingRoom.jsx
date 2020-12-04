@@ -13,8 +13,6 @@ export const WaitingRoom = ({ setInWaitingRoom, inWaitingRoom, sendInvite, users
                 <h3>Waiting Room</h3>
                 <button className='create-game-btn' onClick={setInWaitingRoom}>{joinRoomBtnText}</button>
 
-                <button className='create-game-btn' onClick={() => console.log({usersInWaitingRoom})}>console users</button>
-
                 <ul className="">
                     {usersInWaitingRoom.map(user => (
                         <WaitingRoomUser

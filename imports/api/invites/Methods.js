@@ -1,9 +1,8 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
-import { InvitesCollection } from '/imports/db/InvitesCollection';
+import { InvitesCollection } from '/imports/api/invites/InvitesCollection';
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
-import { createGame } from '../games/Methods'
 
 
 

@@ -1,5 +1,4 @@
-import { Meteor } from 'meteor/meteor';
-import React, { useState } from 'react';
+import React from 'react';
 import { GamesListingItem } from './GamesListingItem';
 
 

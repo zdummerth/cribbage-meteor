@@ -1,14 +1,10 @@
-import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
+import { check } from 'meteor/check';
+import { ValidatedMethod } from 'meteor/mdg:validated-method';
 
 import { GamesCollection } from '/imports/api/games/GamesCollection';
-import { HandsCollection } from '/imports/db/HandsCollection';
-import { RunsCollection } from '/imports/api/runs/RunsCollection';
+import { InvitesCollection } from '/imports/api/invites/InvitesCollection';
 
-import { InvitesCollection } from '/imports/db/InvitesCollection';
-
-
-import { ValidatedMethod } from 'meteor/mdg:validated-method';
 import { createScores } from '../scores/Methods';
 import { createRun } from '../runs/Methods';
 
@@ -79,16 +75,12 @@ export const nextTurn = new ValidatedMethod({
 
     const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
 
-
     if (!game) {
       throw new Meteor.Error('Access denied.');
     }
 
     const oppId = game.oppId();
 
-    console.log({oppId})
-
-    
     GamesCollection.update(gameId, {
       $set: { turn: oppId}
     });
@@ -104,8 +96,6 @@ export const removeGame = new ValidatedMethod({
   run(gameId) {
 
     const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
-
-
 
     if (!game) {
       throw new Meteor.Error('Access denied.');

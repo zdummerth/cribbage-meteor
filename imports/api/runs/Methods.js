@@ -4,13 +4,11 @@ import { Meteor } from 'meteor/meteor';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
-import { HandsCollection } from '/imports/db/HandsCollection';
-import { ScoresCollection } from '/imports/db/ScoresCollection';
+import { HandsCollection } from '/imports/api/hands/HandsCollection';
+import { ScoresCollection } from '/imports/api/scores/ScoresCollection';
 
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
-import { createHand, setIsGo } from '../hands/Methods'
-import { createScores } from '../scores/Methods'
 
 import { deal, getRunPoints, isCardOver31, checkIsGo } from '../cardFunctions.js'
 

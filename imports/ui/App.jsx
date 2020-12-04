@@ -36,16 +36,8 @@ const sendInvite = receiverId => createInvite.call(receiverId);
 const deleteGame = ({ _id }) => removeGame.call(_id);
 
 
-export const App = ({ user, usersInWaitingRoom, invites, games }) => {
+export const App = ({ user, usersInWaitingRoom, setInWaitingRoom, invites, games }) => {
 
-  
-  const setInWaitingRoom = () => Meteor.call('users.setInWaitingRoom');
-
-
-
-  const [ waitingRoomOpen, setwaitingRoomOpen ] = useState(false);
-  const toggleWaitingRoom = () => setwaitingRoomOpen(!waitingRoomOpen);
-  const waitingRoomBtnText = waitingRoomOpen ? 'Close Waiting Room' : 'View Waiting Room';
 
 
   const logout = () => Meteor.logout();
@@ -54,8 +46,6 @@ export const App = ({ user, usersInWaitingRoom, invites, games }) => {
 
   const playGame = ({ game } ) => setCurrentGame(game)
   const closeGame = () => setCurrentGame(null)
-
-
 
 
   return (
@@ -97,14 +87,12 @@ export const App = ({ user, usersInWaitingRoom, invites, games }) => {
                   userId={user._id}
                 />
 
-                {/* <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button> */}
-
-                  <WaitingRoom
-                    setInWaitingRoom={setInWaitingRoom}
-                    inWaitingRoom={user.inWaitingRoom}
-                    sendInvite={sendInvite}
-                    usersInWaitingRoom={usersInWaitingRoom}
-                  /> 
+                <WaitingRoom
+                  setInWaitingRoom={setInWaitingRoom}
+                  inWaitingRoom={user.inWaitingRoom}
+                  sendInvite={sendInvite}
+                  usersInWaitingRoom={usersInWaitingRoom}
+                /> 
                 
               </>
             )}

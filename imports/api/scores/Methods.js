@@ -1,6 +1,6 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
-import { ScoresCollection } from '/imports/db/ScoresCollection';
+import { ScoresCollection } from '/imports/api/scores/ScoresCollection';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
 
 

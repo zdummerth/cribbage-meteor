@@ -1,5 +1,4 @@
 import { Meteor } from 'meteor/meteor';
-import { check } from 'meteor/check';
 
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 import { GamesCollection } from '/imports/api/games/GamesCollection';

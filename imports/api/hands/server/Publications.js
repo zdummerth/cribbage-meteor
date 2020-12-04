@@ -1,9 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 
-import { HandsCollection } from '/imports/db/HandsCollection';
+import { HandsCollection } from '/imports/api/hands/HandsCollection';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
-import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
 
 
