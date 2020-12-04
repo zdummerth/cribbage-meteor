@@ -5,7 +5,8 @@ import { InvitesCollection } from '/imports/db/InvitesCollection';
 const userPublicFields = {
     inWaitingRoom: 1,
     username: 1,
-    _id: 1
+    _id: 1,
+    isGo: 1
 }
 
 Meteor.publish('user', function publishUser() {
@@ -25,8 +26,9 @@ Meteor.publish('users.inWaitingRoom', function publishUsersInWaitingRoom() {
       return this.ready();
   }
 
+  //publish all users for testing
   const selector = {
-    inWaitingRoom: { $eq: true },
+    // inWaitingRoom: { $eq: true },
     _id: { $ne: this.userId }
   };
   

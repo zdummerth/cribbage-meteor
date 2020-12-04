@@ -48,4 +48,7 @@ GamesCollection.helpers({
     }
 
   },
+  oppId() {
+    return this.players.find(playerId => playerId !== Meteor.userId())
+  }
 });

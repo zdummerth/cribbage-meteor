@@ -5,15 +5,14 @@ import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
 import { HandsCollection } from '/imports/db/HandsCollection';
-import { InvitesCollection } from '/imports/db/InvitesCollection';
+import { ScoresCollection } from '/imports/db/ScoresCollection';
 
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
-import { createHand } from '../hands/Methods'
+import { createHand, setIsGo } from '../hands/Methods'
 import { createScores } from '../scores/Methods'
 
-import { deal, getRunPoints } from '../cardFunctions.js'
-
+import { deal, getRunPoints, isCardOver31, checkIsGo } from '../cardFunctions.js'
 
 
 
@@ -62,24 +61,26 @@ export const createRun = new ValidatedMethod({
     });
 
 
-    const handOneId = HandsCollection.insert({
+    HandsCollection.insert({
       createdAt: timestamp,
       dealt: userHand,
       discarded: [],
       completed: false,
       userId: this.userId,
       runId,
-      handLength: 6
+      handLength: 6,
+      isGo: false
     });
 
-    const handTwoId = HandsCollection.insert({
+    HandsCollection.insert({
       createdAt: timestamp,
       dealt: oppHand,
       discarded: [],
       completed: false,
       userId: opponentId,
       runId,
-      handLength: 6
+      handLength: 6,
+      isGo: false
     });
 
     return runId
@@ -100,26 +101,35 @@ export const addToRun = new ValidatedMethod({
       throw new Meteor.Error('Not authorized.');
     }
 
-    // const run = RunsCollection.findOne({ _id: runId });
     const game = GamesCollection.findOne({ currentRunId: runId, players: { $elemMatch: { $eq: this.userId } } } );
-    const hand = HandsCollection.findOne({ runId: runId, userId: this.userId } );
-    const run = RunsCollection.findOne({ _id: runId } );
-
 
     if (!game) {
-      throw new Meteor.Error('There must be a game to add to run');
+      throw new Meteor.Error('could not find game');
     }
+
+    const hand = HandsCollection.findOne({ runId: runId, userId: this.userId } );
 
     if (!hand) {
       throw new Meteor.Error('could not find hand');
     }
 
+    const run = RunsCollection.findOne({ _id: runId } );
+
     if (!run) {
       throw new Meteor.Error('could not find run');
     }
 
+    const scoreDoc = ScoresCollection.findOne({ userId: this.userId, gameId: game._id } );
+
+    if (!scoreDoc) {
+      throw new Meteor.Error('could not find your score');
+    }
+
+
     const { currentRun, pastRuns } = run;
     const { discarded, dealt } = hand;
+
+    console.log({currentRun})
 
 
     const allPastRunCards = [];
@@ -132,36 +142,75 @@ export const addToRun = new ValidatedMethod({
     const cardInHand = card => dealt.includes(card);
     const cardInDiscard = card => discarded.includes(card);
 
-
-
     const validCards = dealt.filter(card => (!cardInRun(card) && !cardInDiscard(card) && cardInHand(card)));
+
+    const isOver31 = isCardOver31({ card , run: currentRun.cards });
+
+    if(isOver31) {
+      throw new Meteor.Error('you played a card over 31');
+    }
 
     if(!validCards.includes(card)) {
       throw new Meteor.Error('you must play a valid card');
     }
 
 
-    // console.log('run before update', run.currentRun.cards);
-    // console.log('run with new card', [...run.currentRun.cards, card]);
-
     const newRun = [...run.currentRun.cards, card];
 
     const { scoringEvents, runTotal } = getRunPoints(newRun);
-    const newScoringEvents = [ ...run.currentRun.scoringEvents, ...scoringEvents]
-    // console.log({ scoringEvents, runTotal });
+    const newPoints = scoringEvents.reduce((acc, cv) => acc + cv.points, 0);
 
-    const newHandLength = validCards.filter(c => c !== card ).length;
-
-    
-
-
-    RunsCollection.update( runId, {
-      $push: { "currentRun.cards": card },
-      $set: { "currentRun.total": runTotal, "currentRun.scoringEvents": newScoringEvents },
+    ScoresCollection.update( { _id: scoreDoc._id, userId: this.userId }, {
+      $inc: { score: newPoints },
     });
 
+    const allScoringEvents = [ ...run.currentRun.scoringEvents, ...scoringEvents];
+    
+    
+    RunsCollection.update( runId, {
+      $push: { "currentRun.cards": card },
+      $set: { "currentRun.total": runTotal, "currentRun.scoringEvents": allScoringEvents },
+    });
+
+    const newHand = validCards.filter(c => c !== card );
+    const newHandLength = newHand.length;
+
+    let isPlayerGo = false;
+    if(newHandLength > 0) {
+      isPlayerGo = checkIsGo({cards: newHand, run: newRun});
+    } else {
+      isPlayerGo === true
+    }
+
+    const oppId = game.players.find(p => p !== this.userId)
+
+    const isOppGo = run.oppHand(oppId).isGo;
+
+
+    const isRunOver = isPlayerGo && isOppGo;
+
+    if(isRunOver) {
+
+    }
+
+
+    const isTurn = game.turnId === this.userId;
+
+    const nextTurnId = isTurn && !isOppGo ? oppId
+     : isRunOver ? 'runOver' : this.userId;
+
+
+    console.log({isRunOver})
+  
+    // console.log({isPlayerGo});
+
+
     HandsCollection.update( hand._id, {
-      $set: { handLength: newHandLength },
+      $set: { handLength: newHandLength, isGo: isPlayerGo },
+    });
+
+    GamesCollection.update( game._id, {
+      $set: { turnId: nextTurnId },
     });
 
   }

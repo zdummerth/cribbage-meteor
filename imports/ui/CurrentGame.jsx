@@ -25,9 +25,7 @@ const MainCardContainer = styled.div`
     height: 200px;
 `
 
-const Run = styled.div`
-
-`
+const Run = styled.div``
 
 const Hand = styled.div`
     display: flex;
@@ -46,7 +44,8 @@ export const CurrentGame = ({
     discarded, 
     currentRun, 
     addCardToRun, 
-    addCardsToCrib 
+    addCardsToCrib,
+    isTurn
 }) => {
 
     let opponentCards = [];
@@ -57,6 +56,10 @@ export const CurrentGame = ({
     const isCribSubmitted = discarded.length === 2;
     const [ cribCards, setCribCards ] = useState([]);
     const [ tempHand, setTempHand ] = useState(hand);
+
+    const turnName = isTurn ? user.username : opponent.username;
+
+    const cardDisabled = discarded.length === 2 && !isTurn
 
     const cardWithProps = ({ card, scoringEventsForCard, noClick }) => (
         <Card 
@@ -70,13 +73,17 @@ export const CurrentGame = ({
             scoringEventsForCard={scoringEventsForCard}
             runId={game.currentRunId}
             noClick={noClick}
+            disabled={cardDisabled}
         />
     )
 
     return (
         <Container>
-                
+            <div>
+                {`Turn: ${turnName}`}
+            </div>
             <Scoreboard>
+                Score:
                 <div>
                     <p>{user.username}</p>
                     <p>{userScore}</p>
@@ -101,7 +108,7 @@ export const CurrentGame = ({
 
                             if (currentRun.scoringEvents.length > 0) {
                                 const scoringEventsForCard = currentRun.scoringEvents.filter(ev => ev.cardIndex === index);
-                                console.log({scoringEventsForCard})
+                                // console.log({scoringEventsForCard})
                                 return cardWithProps({ card, scoringEventsForCard, noClick: false })
                             }
 

@@ -31,14 +31,15 @@ Meteor.publish('hand.forRun', function publishHandForRun(runId) {
     discarded: 1,
     completed: 1,
     userId: 1,
-    runId: 1
+    runId: 1,
+    isGo: 1
   }
 
   return HandsCollection.find(selector, { fields: publicFields });
 
 });
 
-Meteor.publish('opponent.handLength', function publishGames({ runId, oppId, gameId }) {
+Meteor.publish('opponent.hand', function publishGames({ runId, oppId, gameId }) {
   check(oppId, String);
   check(runId, String);
   check(gameId, String);
@@ -51,13 +52,15 @@ Meteor.publish('opponent.handLength', function publishGames({ runId, oppId, game
 
   const game = GamesCollection.findOne({ _id: gameId, currentRunId: runId,  players: { $elemMatch: { $eq: this.userId, $eq: oppId } } });
 
-  // query below works if I need to check against the userId and opp Id
-  // const shellQuery = db.games.find({ _id: "moRTTM5fBghKZFfmm", players: { $elemMatch: { $eq: "h25Tr3MDj2uJWkpox" }, $elemMatch: { $eq: "YW523xxJqQnMgFwZH" } } })
-
   if (!game) {
     throw new Meteor.Error('Access denied.');
   }
 
+  const hand = HandsCollection.findOne({ runId , userId: oppId });
+
+  if (!hand) {
+    throw new Meteor.Error('Access denied.');
+  }
 
   const Selector = {
     runId,
@@ -67,7 +70,8 @@ Meteor.publish('opponent.handLength', function publishGames({ runId, oppId, game
   const publicFields = {
     handLength: 1,
     userId : 1,
-    runId: 1
+    runId: 1,
+    isGo: 1
   }
 
   return HandsCollection.find(Selector, { fields: publicFields } );

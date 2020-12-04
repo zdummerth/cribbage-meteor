@@ -20,12 +20,16 @@ export default function Card({
     runId,
     scoringEventsForCard,
     addCardToRun,
-    noClick
+    noClick,
+    disabled
 }) {
 
     const handleClick = card => {
         
-        if(noClick) return
+        if(noClick || disabled) {
+            console.log({disabled});
+            return
+        }
         if(isCribSubmitted) {
             addCardToRun({ card, runId })
         } else {

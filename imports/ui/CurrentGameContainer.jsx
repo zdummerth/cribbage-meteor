@@ -6,9 +6,12 @@ import { GamesCollection } from '/imports/api/games/GamesCollection';
 import { RunsCollection } from '/imports/api/runs/RunsCollection';
 
 // import { createRun } from '/imports/api/runs/Methods';
-import { discardToCrib } from '/imports/api/hands/Methods';
+import { discardToCrib, setIsGo } from '/imports/api/hands/Methods';
 import { addToRun } from '/imports/api/runs/Methods';
+import { nextTurn } from '/imports/api/games/Methods';
 
+
+import { checkIsGo } from '/imports/api/cardFunctions';
 
 
 
@@ -20,6 +23,8 @@ const addCardToRun = ({ card, runId }) => {
     // console.log({validCards})
 };
 const addCardsToCrib = ({ cards, handId }) => discardToCrib.call({ cards, handId });
+const setPlayerGo = ({ runId, handId }) => setIsGo.call({ runId, handId });
+
 
 
 export const CurrentGameContainer = ({ game, closeGame, user }) => {
@@ -37,7 +42,11 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
         discarded, 
         runDocExists, 
         currentRun, 
-        handId 
+        handId,
+        isTurn,
+        turnId,
+        runId,
+        isGo
     } = useTracker(() => {
 
         const oppHandLenghthSubData = {
@@ -45,21 +54,20 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
             runId: game.currentRunId,
             oppId
         }
-        const oppHandLengthHandler = Meteor.subscribe('opponent.handLength', oppHandLenghthSubData);
+        const oppHandHandler = Meteor.subscribe('opponent.hand', oppHandLenghthSubData);
         const playerHandHandler = Meteor.subscribe('hand.forRun', game.currentRunId);
         const scoresHandler = Meteor.subscribe('scores', game._id);
         const runHandler = Meteor.subscribe('run.forGame', game._id);
 
 
-        const loading = !(playerHandHandler.ready() && oppHandLengthHandler.ready() && scoresHandler.ready() && runHandler.ready());
+        const loading = !(playerHandHandler.ready() && oppHandHandler.ready() && scoresHandler.ready() && runHandler.ready());
 
         const gameDoc = GamesCollection.findOne({ _id: game._id });
         const gameDocExists = !loading && !!gameDoc;
 
-        console.log('currentRun id', game.currentRunId)
 
         const runDoc = RunsCollection.findOne({ _id: game.currentRunId, completed: false });
-        // console.log({runDoc})
+        
         const runDocExists = !loading && !!gameDoc;
 
 
@@ -70,20 +78,24 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
             const opponent = {
                 username: gameDoc.getUsername(oppId),
                 score: gameDoc.score(oppId),
-                handLength: runDoc.getOppHandLength(oppId)
+                handLength: runDoc.oppHand(oppId).handLength,
+                isGo: runDoc.oppHand(oppId).isGo,
             }
 
             const { currentRun } = runDoc;
-            // console.log({currentRun})
+            const runId = runDoc._id
 
             const userScore = gameDoc.score(user._id);
+            const { turnId } = gameDoc;
+            const isTurn = turnId === user._id
 
             const handData = {
                 userId: user._id,
                 runCards: currentRun.cards
             }
 
-            const { hand, discarded, handId } = runDoc.hand(handData);
+            const { hand, discarded, handId, isGo } = runDoc.hand(handData);
+
 
             return { 
                 opponent, 
@@ -94,16 +106,37 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
                 loading, 
                 discarded, 
                 runDocExists, 
-                currentRun 
+                currentRun,
+                turnId,
+                isTurn, 
+                isGo,
+                runId,
             }
 
         } else {
-            // console.log('run doc does not exist')
             return { gameDocExists, runDocExists, loading }
         }
-
-
     });
+    
+    if(gameDocExists && runDocExists) {
+
+        //This checks if go whenever other player plays the last card
+        const isPlayerGo = checkIsGo({ cards: hand, run: currentRun.cards});
+
+        if(isGo && opponent.isGo) {
+            
+            console.log('run is over')
+            // Still need to write this part of the game
+
+        } else if(!isGo && isPlayerGo) {
+            setIsGo.call({ handId, runId, gameId: game._id });
+        } 
+
+    }
+
+    
+
+
      
     return (
         <>
@@ -121,6 +154,7 @@ export const CurrentGameContainer = ({ game, closeGame, user }) => {
                 currentRun={currentRun}
                 addCardsToCrib={addCardsToCrib}
                 addCardToRun={addCardToRun}
+                isTurn={isTurn}
             />
         ) : (
             <>

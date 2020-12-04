@@ -97,16 +97,15 @@ export const App = ({ user, usersInWaitingRoom, invites, games }) => {
                   userId={user._id}
                 />
 
-                <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button>
+                {/* <button className='create-game-btn' onClick={toggleWaitingRoom}>{waitingRoomBtnText}</button> */}
 
-                {waitingRoomOpen && 
                   <WaitingRoom
                     setInWaitingRoom={setInWaitingRoom}
                     inWaitingRoom={user.inWaitingRoom}
                     sendInvite={sendInvite}
                     usersInWaitingRoom={usersInWaitingRoom}
                   /> 
-                }
+                
               </>
             )}
           </>

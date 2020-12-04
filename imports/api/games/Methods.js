@@ -69,6 +69,32 @@ export const createGame = new ValidatedMethod({
   }
 });
 
+export const nextTurn = new ValidatedMethod({
+  name: 'games.nextTurn',
+  validate(gameId) {
+    check(gameId, String)
+  },
+
+  run(gameId) {
+
+    const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } });
+
+
+    if (!game) {
+      throw new Meteor.Error('Access denied.');
+    }
+
+    const oppId = game.oppId();
+
+    console.log({oppId})
+
+    
+    GamesCollection.update(gameId, {
+      $set: { turn: oppId}
+    });
+  }
+});
+
 export const removeGame = new ValidatedMethod({
   name: 'games.remove',
   validate(gameId) {

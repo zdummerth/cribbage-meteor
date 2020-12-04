@@ -1,7 +1,9 @@
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 import { HandsCollection } from '/imports/db/HandsCollection';
+import { RunsCollection } from '/imports/api/runs/RunsCollection';
 import { GamesCollection } from '/imports/api/games/GamesCollection';
+
 
 
 import { ValidatedMethod } from 'meteor/mdg:validated-method';
@@ -28,25 +30,86 @@ export const createHand = new ValidatedMethod({
   }
 });
 
-export const removeHand = new ValidatedMethod({
-  name: 'hands.remove',
-  validate(inviteId) {
-    check(inviteId, String)
+export const setIsGo = new ValidatedMethod({
+  name: 'hands.setIsGo',
+  validate({ handId, runId, gameId }) {
+    check(runId, String);
+    check(handId, String);
+    check(gameId, String);
+
   },
 
-  run(inviteId) {
+  run({ handId, runId, gameId}) {
 
     if (!this.userId) {
       throw new Meteor.Error('Not authorized.');
     }
 
-    const invite = HandsCollection.findOne({ _id: inviteId, $or: [{'sender._id': this.userId}, {'receiver._id': this.userId}] });
+    const game = GamesCollection.findOne({ _id: gameId, players: { $elemMatch: { $eq: this.userId } } } );
 
-    if (!invite) {
+    if (!game) {
+      throw new Meteor.Error('Could not find hand in set is go');
+    }
+
+    const hand = HandsCollection.findOne({ _id: handId, userId: this.userId, runId });
+
+    if (!hand) {
+      throw new Meteor.Error('Could not find hand in set is go');
+    }
+
+    const run = RunsCollection.findOne({ _id: runId });
+
+    if (!run) {
+      throw new Meteor.Error('Could not find run in set is go');
+    }
+
+
+    const oppHand = HandsCollection.findOne({ userId: game.oppId(), runId });
+
+    if (!oppHand) {
+      throw new Meteor.Error('Could not find opponent');
+    }
+
+    if(oppHand.isGo) {
+      const { currentRun, pastRuns } = run;
+      const newPastRuns = [...pastRuns, currentRun]
+
+      // Still need to write this part of the game
+      // If the past runs cards = 8, then create new run and set currentRunId in game 
+      // If past cards < 8 just reset the current run
+      
+    } else {
+  
+      HandsCollection.update( hand._id, {
+        $set: { isGo: true}
+      });
+    }
+
+
+
+      
+  }
+});
+
+export const removeHand = new ValidatedMethod({
+  name: 'hands.remove',
+  validate(handId) {
+    check(handId, String)
+  },
+
+  run(handId) {
+
+    if (!this.userId) {
+      throw new Meteor.Error('Not authorized.');
+    }
+
+    const hand = HandsCollection.findOne();
+
+    if (!hand) {
       throw new Meteor.Error('Access denied.');
     }
 
-    HandsCollection.remove(inviteId);
+    HandsCollection.remove(handId);
   }
 });
 

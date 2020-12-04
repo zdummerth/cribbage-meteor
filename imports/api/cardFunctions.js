@@ -39,8 +39,19 @@ export const getUniqueRandomCard = pickedCard => {
 }
 
 export const getTotal = cards => (
-    cards.map(card => getValue(card)).reduce((acc, cVal) => acc + cVal)
+    cards.map(card => getValue(card)).reduce((acc, cVal) => acc + cVal, 0)
 )
+
+export const isCardOver31 = ({ card, run }) => {
+    const runTotal = getTotal(run);
+
+    return (getValue(card) + runTotal) > 31;
+}
+
+export const checkIsGo = ({ cards, run }) => {
+    const canPlay = cards.find(c => !isCardOver31({ card: c, run }))
+    return !canPlay;
+}
 
 export const findDuplicates = arr => {
     // puts array in ascending order
